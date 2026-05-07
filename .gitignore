@@ -1,6 +1,24 @@
+# Python virtual environment
 backend/.venv/
-backend/__pycache__/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Environment variables
 backend/.env
+
+# Runtime files
 backend/outputs/
 backend/uploads/
-*.pyc
+
+# Node / frontend future
+frontend/node_modules/
+frontend/dist/
+frontend/.env.local
+
+# OS / editor
+.DS_Store
+.vscode/
