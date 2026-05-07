@@ -11,11 +11,14 @@ export function Header({ backendStatus }: HeaderProps) {
 
   return (
     <header className="app-header">
-      <div>
-        <p className="eyebrow">AI 会议助手 Demo</p>
+      <div className="brand-block">
         <h1>MeetFlow AI</h1>
+        <p>AI 会议助手 Demo</p>
       </div>
-      <span className={`status-pill ${backendStatus}`}>{statusText}</span>
+      <span className={`status-pill ${backendStatus}`}>
+        <span aria-hidden="true" />
+        {statusText}
+      </span>
     </header>
   );
 }

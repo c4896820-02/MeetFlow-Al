@@ -16,13 +16,25 @@ export function ExportButtons({ disabled, onExport, payload }: ExportButtonsProp
 
   return (
     <div className="export-row">
-      <button disabled={disabled} onClick={() => onExport("/export/json", "meeting_result.json")}>
+      <button
+        className="secondary-button"
+        disabled={disabled}
+        onClick={() => onExport("/export/json", "meeting_result.json")}
+      >
         导出 JSON
       </button>
-      <button disabled={disabled} onClick={() => onExport("/export/markdown", "meeting_minutes.md")}>
+      <button
+        className="secondary-button"
+        disabled={disabled}
+        onClick={() => onExport("/export/markdown", "meeting_minutes.md")}
+      >
         导出 Markdown
       </button>
-      <button disabled={disabled} onClick={() => onExport("/export/excel", "meeting_result.xlsx")}>
+      <button
+        className="primary-button excel-button"
+        disabled={disabled}
+        onClick={() => onExport("/export/excel", "meeting_result.xlsx")}
+      >
         导出 Excel
       </button>
     </div>

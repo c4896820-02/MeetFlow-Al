@@ -1,4 +1,5 @@
 import type { Decision } from "../types/meeting";
+import { ValueBadge } from "./ValueBadge";
 
 interface DecisionsTableProps {
   decisions: Decision[];
@@ -6,8 +7,10 @@ interface DecisionsTableProps {
 
 export function DecisionsTable({ decisions }: DecisionsTableProps) {
   return (
-    <section className="panel">
-      <h2>关键决策</h2>
+    <section className="panel result-card">
+      <div className="panel-heading compact">
+        <h3>关键决策</h3>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -22,15 +25,19 @@ export function DecisionsTable({ decisions }: DecisionsTableProps) {
             {decisions.length ? (
               decisions.map((item, index) => (
                 <tr key={`${item.decision}-${index}`}>
-                  <td>{item.decision}</td>
-                  <td>{item.owner}</td>
-                  <td>{item.evidence_time}</td>
-                  <td>{item.confidence}</td>
+                  <td>{item.decision || "未知"}</td>
+                  <td>{item.owner || "未知"}</td>
+                  <td>{item.evidence_time || "未知"}</td>
+                  <td>
+                    <ValueBadge type="confidence" value={item.confidence} />
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={4}>暂无关键决策。</td>
+                <td className="empty-cell" colSpan={4}>
+                  未识别到明确关键决策。
+                </td>
               </tr>
             )}
           </tbody>

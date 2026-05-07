@@ -1,4 +1,5 @@
 import type { RiskItem } from "../types/meeting";
+import { ValueBadge } from "./ValueBadge";
 
 interface RisksTableProps {
   risks: RiskItem[];
@@ -6,8 +7,10 @@ interface RisksTableProps {
 
 export function RisksTable({ risks }: RisksTableProps) {
   return (
-    <section className="panel">
-      <h2>风险与待确认问题</h2>
+    <section className="panel result-card">
+      <div className="panel-heading compact">
+        <h3>风险问题</h3>
+      </div>
       <div className="table-wrap">
         <table>
           <thead>
@@ -23,16 +26,20 @@ export function RisksTable({ risks }: RisksTableProps) {
             {risks.length ? (
               risks.map((item, index) => (
                 <tr key={`${item.risk}-${index}`}>
-                  <td>{item.risk}</td>
-                  <td>{item.impact}</td>
-                  <td>{item.suggested_followup}</td>
-                  <td>{item.owner}</td>
-                  <td>{item.severity}</td>
+                  <td>{item.risk || "未知"}</td>
+                  <td>{item.impact || "未知"}</td>
+                  <td>{item.suggested_followup || "未知"}</td>
+                  <td>{item.owner || "未知"}</td>
+                  <td>
+                    <ValueBadge type="severity" value={item.severity} />
+                  </td>
                 </tr>
               ))
             ) : (
               <tr>
-                <td colSpan={5}>暂无风险。</td>
+                <td className="empty-cell" colSpan={5}>
+                  未识别到明确风险问题。
+                </td>
               </tr>
             )}
           </tbody>

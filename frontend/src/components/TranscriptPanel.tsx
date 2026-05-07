@@ -6,23 +6,18 @@ interface TranscriptPanelProps {
 }
 
 export function TranscriptPanel({ transcriptText, segments }: TranscriptPanelProps) {
+  const combinedText = segments.length
+    ? segments
+        .map((segment) => `[${segment.start} - ${segment.end}] ${segment.speaker || "Speaker"}: ${segment.text}`)
+        .join("\n")
+    : transcriptText;
+
   return (
-    <section className="panel">
-      <h2>原始转写文本</h2>
-      {segments.length ? (
-        <div className="segments">
-          {segments.map((segment) => (
-            <article key={segment.id} className="segment">
-              <span>
-                {segment.start} - {segment.end}
-              </span>
-              <p>{segment.text}</p>
-            </article>
-          ))}
-        </div>
-      ) : (
-        <pre className="transcript-output">{transcriptText || "暂无原始转写文本。"}</pre>
-      )}
+    <section className="panel result-card">
+      <div className="panel-heading compact">
+        <h3>原始转写文本</h3>
+      </div>
+      <pre className="transcript-output">{combinedText || "暂无原始转写文本。"}</pre>
     </section>
   );
 }

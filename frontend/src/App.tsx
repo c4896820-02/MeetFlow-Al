@@ -98,30 +98,54 @@ function App() {
   return (
     <div className="app-shell">
       <Header backendStatus={backendStatus} />
-      <main className="main-layout">
-        <div className="input-stack">
-          <TextInputPanel
-            transcript={transcript}
-            isLoading={isLoading}
-            onTranscriptChange={setTranscript}
-            onAnalyze={handleAnalyzeText}
-            onClear={handleClear}
-          />
-          <AudioUploadPanel
-            file={audioFile}
-            isLoading={isLoading}
-            onFileChange={setAudioFile}
-            onAnalyze={handleAnalyzeAudio}
-          />
-          {loadingMode && <LoadingState mode={loadingMode} />}
-          {error && <ErrorMessage message={error} />}
+      <section className="hero-card">
+        <div>
+          <h2>从会议内容自动生成结构化纪要</h2>
+          <p>
+            支持粘贴会议文本或上传音频，自动提取会议摘要、关键决策、TODO
+            清单和风险问题，并支持一键导出。
+          </p>
         </div>
-        <ResultView
-          result={result}
-          exportPayload={exportPayload}
-          isLoading={isLoading}
-          onExport={handleExport}
-        />
+        <div className="hero-tags" aria-label="核心能力">
+          <span>文本分析</span>
+          <span>音频转写</span>
+          <span>结构化导出</span>
+        </div>
+      </section>
+      <main className="main-layout">
+        <section className="workspace-column input-column">
+          <div className="section-heading">
+            <span>Input</span>
+            <h2>会议输入</h2>
+          </div>
+          <div className="input-stack">
+            <TextInputPanel
+              transcript={transcript}
+              isLoading={isLoading}
+              loadingMode={loadingMode}
+              onTranscriptChange={setTranscript}
+              onAnalyze={handleAnalyzeText}
+              onClear={handleClear}
+            />
+            <AudioUploadPanel
+              file={audioFile}
+              isLoading={isLoading}
+              loadingMode={loadingMode}
+              onFileChange={setAudioFile}
+              onAnalyze={handleAnalyzeAudio}
+            />
+            {loadingMode && <LoadingState mode={loadingMode} />}
+            {error && <ErrorMessage message={error} />}
+          </div>
+        </section>
+        <section className="workspace-column result-column">
+          <ResultView
+            result={result}
+            exportPayload={exportPayload}
+            isLoading={isLoading}
+            onExport={handleExport}
+          />
+        </section>
       </main>
     </div>
   );
