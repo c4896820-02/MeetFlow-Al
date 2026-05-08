@@ -7,11 +7,15 @@ MeetFlow AI 是一个面向项目协作场景的 AI 会议助手 Demo，支持�
 ```text
 会议内容
   ↓
-结构化纪要
+ASR 语音转写 / 文本输入
   ↓
-TODO 清单
+大模型结构化分析
   ↓
-可导出结果
+会议摘要 / 决策 / TODO / 风险
+  ↓
+前端可视化展示
+  ↓
+JSON / Markdown / Excel 导出
 ```
 
 ---
@@ -26,9 +30,10 @@ TODO 清单
 - TODO 容易遗漏；
 - 责任人和截止时间不清晰；
 - 会议结论难以追溯；
-- 不同记录人输出质量不稳定。
+- 不同记录人输出质量不稳定；
+- 音频回放与手工整理之间存在明显效率损耗。
 
-MeetFlow AI 希望通过 ASR 语音转写和大模型结构化分析，降低会议后处理成本，并提升任务闭环效率。
+MeetFlow AI 希望通过 **ASR 语音转写 + 大模型结构化分析 + 前端结果展示 + 多格式导出**，降低会议后处理成本，并提升任务闭环效率。
 
 ---
 
@@ -48,16 +53,28 @@ MeetFlow AI 希望通过 ASR 语音转写和大模型结构化分析，降低会
 - 生成会议摘要；
 - 提取关键决策；
 - 提取 TODO 清单；
-- 识别风险与待确认问题。
+- 识别风险与待确认问题；
+- 通过 Prompt 分阶段抽取，降低结构混乱概率。
 
-### 2.3 工程能力
+### 2.3 前端交互能力
+
+- 支持文本输入分析；
+- 支持音频上传分析；
+- 支持会议概览展示；
+- 支持摘要、决策、TODO、风险的分区展示；
+- 支持 transcript 原文展示；
+- 支持 JSON / Markdown / Excel 导出按钮；
+- 支持 loading 和 error 状态提示。
+
+### 2.4 工程能力
 
 - 使用 Pydantic 校验结构化输出；
 - 支持用户编辑后的二次校验；
 - 支持统一错误响应；
 - 支持 JSON / Markdown / Excel 导出；
 - 支持完整会议记录归档；
-- 支持文本和音频两种输入链路。
+- 支持文本和音频两种输入链路；
+- 前后端分离，后端提供 API，前端通过 HTTP 调用后端服务。
 
 ---
 
@@ -65,7 +82,7 @@ MeetFlow AI 希望通过 ASR 语音转写和大模型结构化分析，降低会
 
 ### Backend
 
-- Python
+- Python 3.10+
 - FastAPI
 - Pydantic
 - OpenAI SDK compatible API
@@ -73,11 +90,22 @@ MeetFlow AI 希望通过 ASR 语音转写和大模型结构化分析，降低会
 - openpyxl
 - python-dotenv
 - uvicorn
+- FFmpeg
+
+### Frontend
+
+- Node.js 20+
+- React
+- TypeScript
+- Vite
+- CSS Modules / Global CSS
+- Fetch API
 
 ### AI / Model
 
 - LLM：支持 OpenAI SDK 兼容接口，例如 Kimi、OpenAI、DeepSeek 等；
-- ASR：faster-whisper。
+- ASR：faster-whisper；
+- 音频处理依赖：FFmpeg。
 
 ---
 
@@ -87,6 +115,8 @@ MeetFlow AI 希望通过 ASR 语音转写和大模型结构化分析，降低会
 meetflow-ai/
   README.md
   frontend_task_brief.md
+  .gitignore
+
   backend/
     main.py
     requirements.txt
@@ -114,39 +144,109 @@ meetflow-ai/
         sample_transcript.txt
     uploads/
     outputs/
+
+  frontend/
+    package.json
+    package-lock.json
+    index.html
+    tsconfig.json
+    vite.config.ts
+    src/
+      main.tsx
+      App.tsx
+      api/
+        meetflowApi.ts
+      components/
+        Header.tsx
+        TextInputPanel.tsx
+        AudioUploadPanel.tsx
+        MeetingOverviewCard.tsx
+        SummaryCard.tsx
+        DecisionsTable.tsx
+        ActionItemsTable.tsx
+        RisksTable.tsx
+        TranscriptPanel.tsx
+        ResultView.tsx
+        ExportButtons.tsx
+        LoadingState.tsx
+        ErrorMessage.tsx
+      styles/
+        global.css
+      types/
+        meeting.ts
 ```
 
 ---
 
 ## 5. 环境准备
 
-进入后端目录：
+### 5.1 必要环境
+
+请先确认本机已安装：
+
+| 工具 | 建议版本 | 说明 |
+|---|---:|---|
+| Python | 3.10+ | 后端服务运行环境 |
+| Node.js | 20+ | 前端 Vite/React 运行环境 |
+| npm | 随 Node.js 安装 | 前端依赖管理 |
+| FFmpeg | 8.x 或可用版本 | 音频转写依赖 |
+| Git | 任意稳定版本 | 版本管理 |
+
+检查命令：
+
+```bash
+python --version
+node -v
+npm -v
+ffmpeg -version
+git --version
+```
+
+> 注意：本项目后端建议使用 **Python 3.10 或以上版本**。如果使用过新的 Python 版本导致部分依赖安装异常，建议切换到 Python 3.10 / 3.11 后重建虚拟环境。
+
+---
+
+## 6. 后端启动方式
+
+### 6.1 进入后端目录
 
 ```bash
 cd backend
 ```
 
-创建虚拟环境：
+### 6.2 创建虚拟环境
 
 ```bash
 python -m venv .venv
 ```
 
-Windows PowerShell 激活虚拟环境：
+### 6.3 激活虚拟环境
+
+Windows PowerShell：
 
 ```powershell
 .\.venv\Scripts\Activate.ps1
 ```
 
-安装依赖：
+macOS / Linux：
+
+```bash
+source .venv/bin/activate
+```
+
+激活成功后，终端前面通常会出现：
+
+```text
+(.venv)
+```
+
+### 6.4 安装后端依赖
 
 ```bash
 python -m pip install -r requirements.txt
 ```
 
----
-
-## 6. 环境变量配置
+### 6.5 配置后端环境变量
 
 在 `backend/.env` 中配置：
 
@@ -164,11 +264,9 @@ LLM_BASE_URL=https://api.moonshot.cn/v1
 LLM_MODEL=你的模型名
 ```
 
-`.env.example` 可以保留示例配置，不要把真实 API Key 提交到 GitHub。
+`.env.example` 可以保留示例配置，**不要把真实 API Key 提交到 GitHub**。
 
----
-
-## 7. 启动后端服务
+### 6.6 启动后端服务
 
 在 `backend` 目录下运行：
 
@@ -176,13 +274,18 @@ LLM_MODEL=你的模型名
 uvicorn main:app --reload
 ```
 
-启动后打开：
+启动成功后，终端会出现类似信息：
+
+```text
+Uvicorn running on http://127.0.0.1:8000
+Application startup complete.
+```
+
+后端接口文档：
 
 ```text
 http://127.0.0.1:8000/docs
 ```
-
-查看 FastAPI 自动生成的接口文档。
 
 健康检查地址：
 
@@ -198,7 +301,144 @@ http://127.0.0.1:8000/api-info
 
 ---
 
-## 8. 当前接口清单
+## 7. 前端启动方式
+
+### 7.1 新开一个终端
+
+后端服务启动后，不要关闭后端终端。请在 VSCode 中新开一个终端，用于启动前端。
+
+### 7.2 进入前端目录
+
+在项目根目录执行：
+
+```bash
+cd frontend
+```
+
+如果当前在 `backend` 目录，可以先返回上一级：
+
+```bash
+cd ..
+cd frontend
+```
+
+### 7.3 安装前端依赖
+
+首次运行前端需要安装依赖：
+
+```bash
+npm install
+```
+
+### 7.4 启动前端开发服务
+
+```bash
+npm run dev -- --host 127.0.0.1 --port 5173
+```
+
+启动成功后，终端会出现类似信息：
+
+```text
+VITE ready
+Local: http://127.0.0.1:5173/
+```
+
+在浏览器打开：
+
+```text
+http://127.0.0.1:5173/
+```
+
+即可访问前端页面。
+
+---
+
+## 8. 本地运行顺序
+
+建议按以下顺序启动：
+
+```text
+1. 启动后端
+   cd backend
+   .\.venv\Scripts\Activate.ps1
+   uvicorn main:app --reload
+
+2. 新开终端启动前端
+   cd frontend
+   npm install
+   npm run dev -- --host 127.0.0.1 --port 5173
+
+3. 浏览器访问
+   http://127.0.0.1:5173/
+```
+
+后端地址：
+
+```text
+http://127.0.0.1:8000
+```
+
+前端地址：
+
+```text
+http://127.0.0.1:5173
+```
+
+---
+
+## 9. 前后端联调说明
+
+前端通过 `frontend/src/api/meetflowApi.ts` 调用后端接口。
+
+默认后端地址为：
+
+```text
+http://127.0.0.1:8000
+```
+
+如果后端端口发生变化，需要同步修改前端 API 基础地址。
+
+典型调用链路：
+
+```text
+用户在前端粘贴会议文本
+  ↓
+前端请求 POST /analyze/text
+  ↓
+后端调用 AnalyzerService
+  ↓
+LLM 返回结构化会议结果
+  ↓
+前端展示会议概览、摘要、决策、TODO、风险
+  ↓
+用户点击导出按钮
+  ↓
+前端请求 /export/json、/export/markdown 或 /export/excel
+  ↓
+浏览器下载文件
+```
+
+音频链路：
+
+```text
+用户在前端上传音频
+  ↓
+前端请求 POST /analyze/audio
+  ↓
+后端保存音频文件
+  ↓
+faster-whisper 执行 ASR 转写
+  ↓
+转写文本进入 AnalyzerService
+  ↓
+LLM 生成结构化会议分析结果
+  ↓
+前端展示结果并支持导出
+```
+
+---
+
+## 10. 当前接口清单
 
 | 接口 | 方法 | 说明 |
 |---|---|---|
@@ -215,7 +455,7 @@ http://127.0.0.1:8000/api-info
 
 ---
 
-## 9. 文本分析接口示例
+## 11. 文本分析接口示例
 
 接口：
 
@@ -254,7 +494,7 @@ POST /analyze/text
 
 ---
 
-## 10. 音频上传与转写接口示例
+## 12. 音频上传与转写接口示例
 
 接口：
 
@@ -302,7 +542,7 @@ mp3 / wav / m4a / flac
 
 ---
 
-## 11. 音频分析接口示例
+## 13. 音频分析接口示例
 
 接口：
 
@@ -350,7 +590,7 @@ mp3 / wav / m4a / flac
 
 ---
 
-## 12. MeetingResult 数据结构
+## 14. MeetingResult 数据结构
 
 ```json
 {
@@ -411,7 +651,7 @@ mp3 / wav / m4a / flac
 
 ---
 
-## 13. 结果校验接口
+## 15. 结果校验接口
 
 接口：
 
@@ -452,9 +692,9 @@ AI 生成会议初稿
 
 ---
 
-## 14. 导出能力
+## 16. 导出能力
 
-### 14.1 单文件导出
+### 16.1 单文件导出
 
 当前支持：
 
@@ -464,7 +704,7 @@ AI 生成会议初稿
 
 这三个接口均支持直接传入 `MeetingResult`，也支持传入 `/analyze/audio` 的完整返回。
 
-### 14.2 完整会议记录导出
+### 16.2 完整会议记录导出
 
 接口：
 
@@ -485,7 +725,7 @@ outputs/
 
 ---
 
-## 15. 错误响应格式
+## 17. 错误响应格式
 
 统一错误格式：
 
@@ -514,7 +754,7 @@ outputs/
 
 ---
 
-## 16. Prompt 工作流
+## 18. Prompt 工作流
 
 V1 后端采用分阶段 Prompt 工作流，而不是一次性让模型生成所有内容：
 
@@ -544,7 +784,7 @@ Pydantic 校验
 
 ---
 
-## 17. V1 不做的功能
+## 19. V1 不做的功能
 
 V1 暂不包含：
 
@@ -569,16 +809,16 @@ V1 暂不包含：
 
 ---
 
-## 18. 后续规划
+## 20. 后续规划
 
 ### V2
 
-- 前端页面 Demo；
 - 用户编辑 TODO、责任人、截止时间；
 - 飞书多维表格同步；
 - 任务状态追踪；
 - 多会议历史记录；
-- 更完整的结果编辑体验。
+- 更完整的结果编辑体验；
+- 更完善的前端交互与结果管理。
 
 ### V3
 
@@ -590,7 +830,7 @@ V1 暂不包含：
 
 ---
 
-## 19. 项目亮点
+## 21. 项目亮点
 
 1. 不直接信任大模型输出，而是通过 Pydantic 进行结构化校验；
 2. 支持文本和音频两种输入方式；
@@ -600,5 +840,26 @@ V1 暂不包含：
 6. 支持 JSON、Markdown、Excel 多种格式导出；
 7. 支持完整会议记录归档能力；
 8. 后端接口具备统一错误响应，便于前端处理；
-9. V1 明确控制产品边界，先验证会后处理核心链路，不盲目做实时转写和平台集成。
+9. 前后端分离，具备完整 Demo 展示能力；
+10. V1 明确控制产品边界，先验证会后处理核心链路，不盲目做实时转写和平台集成。
 
+---
+
+## 22. Git 提交建议
+
+如果修改了 README 或代码，可以按以下流程提交：
+
+```bash
+git status
+git add README.md
+git commit -m "docs: update README with frontend setup"
+git push origin main
+```
+
+如果修改范围较大，也可以使用：
+
+```bash
+git add .
+git commit -m "docs: improve project setup guide"
+git push origin main
+```
